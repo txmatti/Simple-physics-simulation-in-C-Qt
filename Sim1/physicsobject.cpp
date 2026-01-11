@@ -1,0 +1,64 @@
+#include "physicsobject.hh"
+#include "constants.hh"
+
+PhysicsObject::PhysicsObject(Type type, Color color, string name, int weight, Coord location, Momentum momentum)
+    : type_(type), color_(color), name_(name), weight_(weight), location_(location), momentum_(momentum)
+{
+
+}
+
+PhysicsObject::~PhysicsObject() {}
+
+
+Type PhysicsObject::get_type()
+{
+    return type_;
+}
+
+Color PhysicsObject::get_color()
+{
+    return color_;
+}
+
+string PhysicsObject::get_name()
+{
+    return name_;
+}
+
+int PhysicsObject::get_weight()
+{
+    return weight_;
+}
+
+Coord PhysicsObject::get_location()
+{
+    return location_;
+}
+
+Momentum PhysicsObject::get_momentum()
+{
+    return momentum_;
+}
+
+void PhysicsObject::update_location()
+{
+    location_.x += momentum_.x_amount;
+    location_.y += momentum_.y_amount;
+}
+
+void PhysicsObject::update_momentum()
+{
+    momentum_.y_amount -= GRAVITY / TICK_DURATION;
+    if(momentum_.y_amount < -300) {
+        momentum_.y_amount = -300;
+    }
+}
+
+void PhysicsObject::set_location(int x, int y)
+{
+    location_.x = x;
+    location_.y = y;
+}
+
+
+
