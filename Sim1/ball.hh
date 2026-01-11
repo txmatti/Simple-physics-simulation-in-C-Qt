@@ -10,6 +10,7 @@ public:
     ~Ball();
 
     int get_size();
+    void check_collision();
 
 private:
     int size_;

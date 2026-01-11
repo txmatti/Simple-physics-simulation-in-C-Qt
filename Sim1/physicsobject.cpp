@@ -10,32 +10,32 @@ PhysicsObject::PhysicsObject(Type type, Color color, string name, int weight, Co
 PhysicsObject::~PhysicsObject() {}
 
 
-Type PhysicsObject::get_type()
+Type PhysicsObject::get_type() const
 {
     return type_;
 }
 
-QColor PhysicsObject::get_color()
+QColor PhysicsObject::get_color() const
 {
     return QColor(static_cast<Qt::GlobalColor>(color_));
 }
 
-string PhysicsObject::get_name()
+string PhysicsObject::get_name() const
 {
     return name_;
 }
 
-int PhysicsObject::get_weight()
+int PhysicsObject::get_weight() const
 {
     return weight_;
 }
 
-Coord PhysicsObject::get_location()
+Coord PhysicsObject::get_location() const
 {
     return location_;
 }
 
-Momentum PhysicsObject::get_momentum()
+Momentum PhysicsObject::get_momentum() const
 {
     return momentum_;
 }
@@ -48,7 +48,7 @@ void PhysicsObject::update_location()
 
 void PhysicsObject::update_momentum()
 {
-    momentum_.y_amount -= GRAVITY / TICK_DURATION;
+    momentum_.y_amount -= GRAVITY / (1000 / TICK_DURATION);
     if(momentum_.y_amount < -300) {
         momentum_.y_amount = -300;
     }
@@ -58,6 +58,12 @@ void PhysicsObject::set_location(int x, int y)
 {
     location_.x = x;
     location_.y = y;
+}
+
+void PhysicsObject::set_momentum(int x, int y)
+{
+    momentum_.x_amount = x;
+    momentum_.y_amount = y;
 }
 
 

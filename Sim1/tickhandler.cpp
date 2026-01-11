@@ -1,11 +1,9 @@
 
 #include "constants.hh"
 #include "tickhandler.hh"
+#include <algorithm>
 #include <QDebug>
 #include <QPainter>
-#include <thread>
-
-using namespace std::chrono;
 
 TickHandler::TickHandler(QObject *parent)
     : QObject(parent)
@@ -58,8 +56,18 @@ void TickHandler::tick_once() {
     p.fillRect(buffer_.rect(), Qt::white);
     p.setPen(Qt::NoPen);
 
-    for(auto& ball : world_.get_balls()) {
+    auto& balls = world_.get_balls();
+
+    // Update BALLS
+    for(auto& ball : balls) {
+        int x = ball.get_location().x;
+        int y = ball.get_location().y;
+
+        // Remove out-of-bounds balls
+
+
         ball.update_location();
+        ball.check_collision();
         ball.update_momentum();
 
 
@@ -68,8 +76,25 @@ void TickHandler::tick_once() {
         int size = ball.get_size();
         p.setBrush(ball.get_color());
 
-        QRect rect(int(ball.get_location().x) - size/2, int(ball.get_location().y) - size/2, size, size);
+        QRect rect(x - size, y - size, size*2, size*2);
         p.drawEllipse(rect);
+    }
+
+
+
+    for (auto it = balls.begin(); it != balls.end(); /* no ++ */) {
+        const auto loc = it->get_location();
+        const bool out =
+            (loc.x < 0 || loc.x > WINDOW_WIDTH ||
+             loc.y < 0 || loc.y > WINDOW_HEIGHT);
+
+        if (out) {
+            // Optional debug
+            // qDebug() << "Erasing ball at" << loc.x << loc.y << "size" << it->get_size();
+            it = balls.erase(it); // returns next iterator
+        } else {
+            ++it;
+        }
     }
 
     emit frame_ready(buffer_);
