@@ -42,15 +42,14 @@ Momentum PhysicsObject::get_momentum() const
 
 void PhysicsObject::update_location()
 {
-    location_.x += momentum_.x_amount;
-    location_.y += momentum_.y_amount;
+    location_.x += momentum_.x_amount * (TICK_DURATION / 1000.0);
+    location_.y += momentum_.y_amount * (TICK_DURATION / 1000.0);
 }
 
-void PhysicsObject::update_momentum()
+void PhysicsObject::apply_gravity()
 {
-    momentum_.y_amount -= GRAVITY / (1000 / TICK_DURATION);
-    if(momentum_.y_amount < -300) {
-        momentum_.y_amount = -300;
+    if(!at_rest_) {
+        momentum_.y_amount -= GRAVITY * (TICK_DURATION / 1000.0);
     }
 }
 
@@ -64,6 +63,11 @@ void PhysicsObject::set_momentum(int x, int y)
 {
     momentum_.x_amount = x;
     momentum_.y_amount = y;
+}
+
+void PhysicsObject::set_rest(bool value)
+{
+    at_rest_ = value;
 }
 
 

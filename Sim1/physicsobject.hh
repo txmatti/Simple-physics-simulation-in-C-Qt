@@ -45,9 +45,11 @@ public:
     virtual Momentum get_momentum() const;
 
     virtual void update_location();
-    virtual void update_momentum();
+    virtual void apply_gravity();
     virtual void set_location(int x, int y);
     virtual void set_momentum(int x, int y);
+
+    virtual void set_rest(bool value);
 
 
 private:
@@ -57,6 +59,7 @@ private:
     int weight_;
     Coord location_;
     Momentum momentum_;
+    bool at_rest_ = false;
 };
 
 #endif // PHYSICSOBJECT_HH

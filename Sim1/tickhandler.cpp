@@ -12,8 +12,8 @@ TickHandler::TickHandler(QObject *parent)
     buffer_.fill(Qt::white);
 
     Coord ball_location = {200, 500};
-    world_.add_ball(DYNAMIC, RED, "ball1", 10, ball_location, 30, {3, 5});
-    world_.add_ball(DYNAMIC, GREEN, "clickball", 10, {500, 500}, 10);
+    world_.add_ball(DYNAMIC, RED, "ball1", 10, ball_location, 30, {300, 150});
+    world_.add_ball(DYNAMIC, GREEN, "clickball", 10, {500, 500}, 10, {-100, 250});
 
 }
 
@@ -60,38 +60,27 @@ void TickHandler::tick_once() {
 
     // Update BALLS
     for(auto& ball : balls) {
-        int x = ball.get_location().x;
-        int y = ball.get_location().y;
-
-        // Remove out-of-bounds balls
-
-
+        ball.apply_gravity();
         ball.update_location();
         ball.check_collision();
-        ball.update_momentum();
 
-
-
-        // Draw something: a 10x10 block centered at (x_, y_)
         int size = ball.get_size();
         p.setBrush(ball.get_color());
 
-        QRect rect(x - size, y - size, size*2, size*2);
+        QRect rect(ball.get_location().x - size, ball.get_location().y - size, size*2, size*2);
         p.drawEllipse(rect);
     }
 
 
-
-    for (auto it = balls.begin(); it != balls.end(); /* no ++ */) {
-        const auto loc = it->get_location();
-        const bool out =
+    // Remove out-of-bounds balls
+    for (auto it = balls.begin(); it != balls.end();) {
+        auto loc = it->get_location();
+        bool out =
             (loc.x < 0 || loc.x > WINDOW_WIDTH ||
              loc.y < 0 || loc.y > WINDOW_HEIGHT);
 
         if (out) {
-            // Optional debug
-            // qDebug() << "Erasing ball at" << loc.x << loc.y << "size" << it->get_size();
-            it = balls.erase(it); // returns next iterator
+            it = balls.erase(it);
         } else {
             ++it;
         }

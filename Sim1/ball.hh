@@ -6,7 +6,7 @@
 class Ball:public PhysicsObject
 {
 public:
-    Ball(PhysicsObject& object, int size);
+    Ball(PhysicsObject& object, int size, double bouncy = 80.0);
     ~Ball();
 
     int get_size();
@@ -14,6 +14,7 @@ public:
 
 private:
     int size_;
+    double bounciness_;
 
 };
 
