@@ -24,7 +24,7 @@ public:
     void set_pixel(int x, int y, QColor color = Qt::black);
 
 signals:
-    void canvasSizeChanged(const QSize&);
+    void click_at(QPointF pos);
 
 
 protected:
@@ -38,7 +38,7 @@ private:
     Ui::MainWindow *ui;
     QImage canvas_;
 
-    QThread* workerThread_ = nullptr;
+    QThread* worker_thread_ = nullptr;
     TickHandler* worker_ = nullptr;
 
     void startWorker();

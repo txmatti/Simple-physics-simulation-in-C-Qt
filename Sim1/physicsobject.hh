@@ -1,17 +1,19 @@
 #ifndef PHYSICSOBJECT_HH
 #define PHYSICSOBJECT_HH
 
+#include "qnamespace.h"
+#include <QColor>
 #include <string>
 
 using namespace std;
 
 enum Color {
-    WHITE,
-    BLACK,
-    RED,
-    GREEN,
-    BLUE,
-    YELLOW
+    WHITE = Qt::white,
+    BLACK = Qt::black,
+    RED = Qt::red,
+    GREEN = Qt::green,
+    BLUE = Qt::blue,
+    YELLOW = Qt::yellow
 };
 
 enum Type {
@@ -36,7 +38,7 @@ public:
     ~PhysicsObject();
 
     virtual Type get_type();
-    virtual Color get_color();
+    virtual QColor get_color();
     virtual string get_name();
     virtual int get_weight();
     virtual Coord get_location();

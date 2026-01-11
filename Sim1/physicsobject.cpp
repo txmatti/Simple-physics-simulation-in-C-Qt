@@ -15,9 +15,9 @@ Type PhysicsObject::get_type()
     return type_;
 }
 
-Color PhysicsObject::get_color()
+QColor PhysicsObject::get_color()
 {
-    return color_;
+    return QColor(static_cast<Qt::GlobalColor>(color_));
 }
 
 string PhysicsObject::get_name()

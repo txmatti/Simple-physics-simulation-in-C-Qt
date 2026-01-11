@@ -1,6 +1,7 @@
 
 #include "constants.hh"
 #include "tickhandler.hh"
+#include <QDebug>
 #include <QPainter>
 #include <thread>
 
@@ -9,42 +10,53 @@ using namespace std::chrono;
 TickHandler::TickHandler(QObject *parent)
     : QObject(parent)
 {
-    buffer_ = QImage(targetSize_, QImage::Format_ARGB32_Premultiplied);
+    buffer_ = QImage({WINDOW_WIDTH, WINDOW_HEIGHT}, QImage::Format_ARGB32_Premultiplied);
     buffer_.fill(Qt::white);
-    Coord ball_location = {200, 600};
-    world_.add_ball(DYNAMIC, BLACK, "ball1", 10, ball_location, 200, {3, 5});
+
+    Coord ball_location = {200, 500};
+    world_.add_ball(DYNAMIC, RED, "ball1", 10, ball_location, 30, {3, 5});
+    world_.add_ball(DYNAMIC, GREEN, "clickball", 10, {500, 500}, 10);
+
 }
 
 void TickHandler::start() {
-    if (running_.exchange(true)) return; // already running
+    if (running_) return; // already running
 
-    // Drift-free periodic schedule
-    const milliseconds tick_time(TICK_DURATION); // 50 ms per tick; change to your TICK_DURATION
-    auto next = s_clock::now();
 
-    while (running_.load(std::memory_order_relaxed)) {
-        tickOnce();                         // do physics + render one frame
-        emit frameReady(buffer_);           // emit a copy (implicitly shared)
+    // Create the timer in this thread’s context
+    timer_ = new QTimer(this);
+    timer_->setTimerType(Qt::PreciseTimer);
+    timer_->setInterval(TICK_DURATION);
 
-        next += tick_time;
-        std::this_thread::sleep_until(next);
-    }
+    connect(timer_, &QTimer::timeout, this, &TickHandler::tick_once);
+    timer_->start();
+
 }
 
 void TickHandler::stop() {
     running_.store(false, std::memory_order_relaxed);
 }
 
+void TickHandler::click_at(QPointF pos)
+{
+
+    Coord click_location = {pos.x(), WINDOW_HEIGHT - pos.y()};
+    world_.add_ball(DYNAMIC, BLUE, "clickball", 10, click_location, 20);
+}
 
 
-void TickHandler::tickOnce() {
 
-    // ---- Render into the off-screen image (thread-local) ----
+void TickHandler::tick_once() {
+
+    // Render into the off-screen image
     QPainter p(&buffer_);
     p.setRenderHint(QPainter::Antialiasing, false);
 
-    // Clear background
+    p.translate(0, buffer_.height()); // move origin to bottom-left
+    p.scale(1, -1);
+
     p.fillRect(buffer_.rect(), Qt::white);
+    p.setPen(Qt::NoPen);
 
     for(auto& ball : world_.get_balls()) {
         ball.update_location();
@@ -54,9 +66,12 @@ void TickHandler::tickOnce() {
 
         // Draw something: a 10x10 block centered at (x_, y_)
         int size = ball.get_size();
-        QRect rect(int(ball.get_location().x) - size/2, WINDOW_HEIGHT - int(ball.get_location().y) - size/2, size, size);
-        p.fillRect(rect, Qt::black);
+        p.setBrush(ball.get_color());
 
+        QRect rect(int(ball.get_location().x) - size/2, int(ball.get_location().y) - size/2, size, size);
+        p.drawEllipse(rect);
     }
+
+    emit frame_ready(buffer_);
 
 }

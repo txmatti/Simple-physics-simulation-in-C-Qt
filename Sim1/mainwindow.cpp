@@ -42,44 +42,38 @@ void MainWindow::set_pixel(int x, int y, QColor color) {
 
 
 void MainWindow::mousePressEvent(QMouseEvent *event) {
-    int size = 10;
-    int x = event->pos().x();
-    int y = event->pos().y();
-    for(int ix = 0; ix < size; ix++) {
-        for(int iy = 0; iy < size; iy++) {
-            set_pixel(x - size/2 + ix, y - size/2 + iy);
-        }
-    }
-    update();
+    emit click_at(event->pos());
+
 }
 
 void MainWindow::startWorker()
 {
-    workerThread_ = new QThread(this);
+    worker_thread_ = new QThread(this);
     worker_ = new TickHandler();
 
-    worker_->moveToThread(workerThread_);
+    worker_->moveToThread(worker_thread_);
 
-    connect(workerThread_, &QThread::started, worker_, &TickHandler::start);
-    connect(worker_, &TickHandler::frameReady, this, &MainWindow::onFrameReady);
+    connect(worker_thread_, &QThread::started, worker_, &TickHandler::start);
+    connect(worker_, &TickHandler::frame_ready, this, &MainWindow::onFrameReady);
 
+    connect(this, &MainWindow::click_at, worker_, &TickHandler::click_at, Qt::QueuedConnection);
 
     connect(this, &QObject::destroyed, worker_, &TickHandler::stop);
-    connect(workerThread_, &QThread::finished, worker_, &QObject::deleteLater);
-    connect(workerThread_, &QThread::finished, workerThread_, &QObject::deleteLater);
+    connect(worker_thread_, &QThread::finished, worker_, &QObject::deleteLater);
+    connect(worker_thread_, &QThread::finished, worker_thread_, &QObject::deleteLater);
 
-    workerThread_->start();
+    worker_thread_->start();
 
 }
 
 
 void MainWindow::stopWorker() {
-    if (!workerThread_) return;
+    if (!worker_thread_) return;
     // Ask worker to stop and end the thread
     QMetaObject::invokeMethod(worker_, "stop", Qt::QueuedConnection);
-    workerThread_->quit();
-    workerThread_->wait();
-    workerThread_ = nullptr;
+    worker_thread_->quit();
+    worker_thread_->wait();
+    worker_thread_ = nullptr;
     worker_ = nullptr;
 }
 
